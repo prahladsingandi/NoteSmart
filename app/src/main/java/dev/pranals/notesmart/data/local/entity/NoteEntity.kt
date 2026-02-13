@@ -26,5 +26,9 @@ data class NoteEntity(
 
     val isDeleted: Boolean = false,
 
-    val syncState: SyncState = SyncState.PENDING_UPLOAD
+    val syncState: SyncState = SyncState.PENDING_UPLOAD,
+
+    val color: Int = 0,
+
+    val reminderTime: Long? = null
 )

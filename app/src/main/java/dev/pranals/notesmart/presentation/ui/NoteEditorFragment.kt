@@ -1,84 +1,92 @@
 package dev.pranals.notesmart.presentation.ui
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.lifecycleScope
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.textfield.TextInputEditText
+import dagger.hilt.android.AndroidEntryPoint
 import dev.pranals.notesmart.R
 import dev.pranals.notesmart.data.local.entity.NoteEntity
 import dev.pranals.notesmart.presentation.viewmodel.NotesViewModel
-import dev.pranals.notesmart.presentation.viewmodel.NotesViewModelFactory
-import kotlin.getValue
+import kotlinx.coroutines.launch
+import java.util.UUID
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-private lateinit var saveButton: Button
+@AndroidEntryPoint
+class NoteEditorFragment : Fragment(R.layout.fragment_note_editor) {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [NoteEditorFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class NoteEditorFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val viewModel: NotesViewModel by viewModels()
+
+    private lateinit var titleEt: TextInputEditText
+    private lateinit var contentEt: TextInputEditText
+    private lateinit var toolbar: MaterialToolbar
+    private lateinit var saveFab: FloatingActionButton
+
+    private var noteId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+        noteId = arguments?.getString(ARG_NOTE_ID)
     }
-
-
-    private val viewModel: NotesViewModel by viewModels {
-        NotesViewModelFactory(requireContext())
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_note_editor, container, false)
-    }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        saveButton = view.findViewById(R.id.saveButton)
-        saveButton.setOnClickListener {
-         viewModel.saveNote(NoteEntity(
-             1.toString(), "", 123.toString(), 23454321,
-             createdAt = TODO(),
-             isDeleted = TODO(),
-             syncState = TODOxzzzzxz
+        toolbar = view.findViewById(R.id.toolbar)
+        titleEt = view.findViewById(R.id.titleEditText)
+        contentEt = view.findViewById(R.id.contentEditText)
+        saveFab = view.findViewById(R.id.saveNoteFab)
+
+        toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
+        saveFab.setOnClickListener {
+            saveNote()
+            parentFragmentManager.popBackStack()
+        }
+
+        loadNoteIfEditing()
+    }
+
+    private fun loadNoteIfEditing() {
+        noteId?.let { id ->
+            lifecycleScope.launch {
+                viewModel.getNote(id)?.let { note ->
+//                    titleEt.setText(note.title)
+                    contentEt.setText(note.content)
+                }
+            }
         }
     }
+
+    private fun saveNote() {
+        val title = titleEt.text.toString().trim()
+        val content = contentEt.text.toString().trim()
+
+        if (title.isEmpty() && content.isEmpty()) return
+
+        val note = NoteEntity(
+            id = noteId ?: UUID.randomUUID().toString(),
+            title = title,
+            content = content,
+            createdAt = System.currentTimeMillis(),
+            lastModified = System.currentTimeMillis()
+        )
+
+        viewModel.saveNote(note)
+    }
+
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment NoteEditorFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String?) =
+        private const val ARG_NOTE_ID = "note_id"
+
+        fun newInstance(noteId: String?) =
             NoteEditorFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putString(ARG_NOTE_ID, noteId)
                 }
             }
     }

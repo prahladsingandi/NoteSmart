@@ -2,4 +2,7 @@
     <string name="app_name">Note Smart</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_notes_message">No notes yet. Tap + to add one!</string>
+    <string name="edit_note">Edit Note</string>
+    <string name="search">Search</string>
 </resources>

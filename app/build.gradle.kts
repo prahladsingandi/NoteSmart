@@ -1,8 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.devtools.ksp")
-
-//    id("com.google.dagger.hilt.android")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -44,6 +43,7 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.recyclerview.selection)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,8 +60,10 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.8.4")
     implementation( "androidx.room:room-ktx:2.8.4")
     ksp("androidx.room:room-compiler:2.8.4")
-//    implementation ("com.google.dagger:hilt-android:2.59.1")
-//    ksp ("com.google.dagger:hilt-compiler:2.59.1")
+
+    implementation("com.google.dagger:hilt-android:2.59.1")
+    ksp("com.google.dagger:hilt-compiler:2.59.1")
+
 
 
 
